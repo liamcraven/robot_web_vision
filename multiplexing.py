@@ -8,11 +8,22 @@ def color_encoding(data): #TODO: Implement
     (red_data, green_data, blue_data) = binary_encoding(red_data, green_data, blue_data)
     return (red_data, green_data, blue_data)
 
-def interleaving(data): #TODO: Implement
+def interleaving(data): #TODO: Test
     """
     Interleaves data accross all 3 channels of the QR code
     """
-    (red_data, green_data, blue_data) = NotImplemented
+    #Convert data to byte array
+    data = data.tobytes()
+    # Interleave and split the data so that it is spread across all 3 channels of the QR code
+    for i in range(0, len(data), 3):
+        red_data += data[i]
+        green_data += data[i+1]
+        blue_data += data[i+2]
+    if len(data) % 3 == 1:
+        red_data += data[-1]
+    elif len(data) % 3 == 2:
+        red_data += data[-2]
+        green_data += data[-1]
     return (red_data, green_data, blue_data)
 
 def binary_encoding(red_data, green_data, blue_data): #TODO: Implement - may not be needed

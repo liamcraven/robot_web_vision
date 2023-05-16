@@ -1,4 +1,6 @@
-from data_manipulation import prepare_data
+import qrcode
+
+from data_manipulation import prepare_data, np_to_binary
 from error_correction import error_correction_encoding
 from multiplexing import multiplexer, color_encoding
 """
@@ -20,12 +22,26 @@ QR Code Generation:
     - Save the image as a png file
 """
 
-def qr_code_generation(red_data, green_data, blue_data): #TODO: Implement 
+def qr_code_generation(red_data, green_data, blue_data, version, ec_level): #TODO: Test
     """
     This function generates the QR code for each of the colour channels.
     """
     # Use the qrcode module to generate the QR code for each of the colour channels
-    red_qr_code, green_qr_code, blue_qr_code = NotImplemented
+    red_qr_code = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4)
+    red_qr_code.add_data(red_data)
+    red_qr_code.make(fit=True)
+    red_qr_code = red_qr_code.make_image(fill_color="red", back_color="white")
+
+    green_qr_code = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4)
+    green_qr_code.add_data(green_data)
+    green_qr_code.make(fit=True)
+    green_qr_code = green_qr_code.make_image(fill_color="green", back_color="white")
+
+    blue_qr_code = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4)
+    blue_qr_code.add_data(blue_data)
+    blue_qr_code.make(fit=True)
+    blue_qr_code = blue_qr_code.make_image(fill_color="blue", back_color="white")
+
     return (red_qr_code, green_qr_code, blue_qr_code)
 
 
@@ -44,11 +60,17 @@ def encoder(data_path, error_correction_level, version, encoder_save_path): #TOD
     # Prepare data - we want to get the data into a format that we can use
     data = prepare_data(data_path)
     # Error correction
-    data = error_correction_encoding(data, error_correction_level, version)
+    ec_data = error_correction_encoding(data, error_correction_level, version)
+
+    # Convert data to binary and combine with EC data
+    data = np_to_binary(data)
+    ec_data = np_to_binary(ec_data)
+    data += ec_data
+
     # Color encoding
     (red_data, green_data, blue_data) = color_encoding(data)
     # QR code generation
-    (red_qr_code, green_qr_code, blue_qr_code) = qr_code_generation(red_data, green_data, blue_data)
+    (red_qr_code, green_qr_code, blue_qr_code) = qr_code_generation(red_data, green_data, blue_data, version, error_correction_level)
     # Multiplexing
     multiplexed_qr_code = multiplexer(red_qr_code, green_qr_code, blue_qr_code)
     # Save QR code

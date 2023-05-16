@@ -1,6 +1,18 @@
 import torch
 import numpy as np
 
+def np_to_binary(data):
+    """
+    This function converts the dictionary of numpy arrays to a single bytestring.
+    """
+    data = data["linearization_point"].tobytes()
+    data += data["factor_to_variable_messages"]["message mean"].tobytes()
+    data += data["factor_to_variable_messages"]["message precision"].tobytes()
+    data += data["variable_to_factor_messages"]["message mean"].tobytes()
+    data += data["variable_to_factor_messages"]["message precision"].tobytes()
+
+    return data
+
 # Encoding Tools
 def data_serialization(data_path): #TODO: Implement 
     data = NotImplemented
@@ -10,12 +22,34 @@ def data_compression(data): #TODO: Implement
     data = NotImplemented
     return data
 
-def prepare_data(data_path): #TODO: Implement 
+def prepare_data(data_path): #TODO: Test
     """
     This function prepares the data for encoding.
     """
     # Serialise data
     data = torch.load(data_path)
+
+    lin_point = data["linearization_point"]
+    f2v = data["factor_to_variable_messages"]
+    v2f = data["variable_to_factor_messages"]
+
+    f2v_msg_mean = f2v["message mean"]
+    f2v_msg_precision = f2v["message precision"]
+
+    v2f_msg_mean = v2f["message mean"]
+    v2f_msg_precision = v2f["message precision"]
+
+    #Convert to numpy array from torch tensor
+    lin_point = lin_point.numpy()
+
+    f2v_msg_mean = f2v_msg_mean.numpy()
+    f2v_msg_precision = f2v_msg_precision.numpy()
+
+    v2f_msg_mean = v2f_msg_mean.numpy()
+    v2f_msg_precision = v2f_msg_precision.numpy()
+
+    # Convert the data back to a dictionary
+    data = {"linearization_point": lin_point, "factor_to_variable_messages": {"message mean": f2v_msg_mean, "message precision": f2v_msg_precision}, "variable_to_factor_messages": {"message mean": v2f_msg_mean, "message precision": v2f_msg_precision}}
     return data
 
 
