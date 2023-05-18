@@ -12,20 +12,18 @@ def ec_codeword_generation(array): #TODO: Test
     rs = RSCodec(2) # 2 is the number of error correction bytes we want to use
     shape = array.shape #Stores original shape of array
     floats = array.flatten()
+    if type(floats) is not np.ndarray:
+        floats = floats.numpy() #Convert to numpy array
     combined = np.array([])
     for float in floats:
-        float = float.view(np.float64) #Convert to 64 bit float
-        #We want to convert the float to a byte array
-        bytearray = struct.pack('f', float) 
-        #Split the byte array into most significant bits and least significant bits
-        msb = bytearray[0:2] # most significant bits (2 bytes)
-        lsb = bytearray[2:8] # least significant bits (6 bytes)
-        #Apply error correction to the most significant bits
-        msb = rs.encode(msb)
-        #Convert the byte array back to a float
-        float = struct.unpack('f', bytearray)
-        #Convert the float back to a numpy float
-        combined = np.append(combined, np.array(float).astype(np.float32))
+        print(type(float))
+        # Round the numbers to 2 decimal places
+        float_rounded = np.round(float, 2)
+
+        # Then convert to float32 or float16
+        float_rounded_32 = float_rounded.astype(np.float32)
+        float_rounded_16 = float_rounded.astype(np.float16)
+        combined = np.append(combined, np.array(float).astype(np.float16))
     #Reshape the array back to its original shape
     array = combined.reshape(shape)
     return array
@@ -40,21 +38,16 @@ def error_correction_encoding(data, error_correction_level, version): #TODO: Tes
     ec_data = {}
 
     # We use the ec_codeword_generation function to generate the error correction codewords
-    lp_shape = data["linearization_point"].shape
     ec_data["linearization_point"] = ec_codeword_generation(data["linearization_point"])
 
     # Now lets do the factor to variable messages
-    f2v_mm_shape_ = data["factor_to_variable_messages"]["message mean"].shape
     ec_data["factor_to_variable_messages"] = {}
     ec_data["factor_to_variable_messages"]["message mean"] = ec_codeword_generation(data["factor_to_variable_messages"]["message mean"])
-    f2v_mp_shape = data["factor_to_variable_messages"]["message precision"].shape
     ec_data["factor_to_variable_messages"]["message precision"] = ec_codeword_generation(data["factor_to_variable_messages"]["message precision"])
 
     # Now lets do the variable to factor messages
-    v2f_mm_shape = data["variable_to_factor_messages"]["message mean"].shape
     ec_data["variable_to_factor_messages"] = {}
     ec_data["variable_to_factor_messages"]["message mean"] = ec_codeword_generation(data["variable_to_factor_messages"]["message mean"])
-    v2f_mp_shape = data["variable_to_factor_messages"]["message precision"].shape
     ec_data["variable_to_factor_messages"]["message precision"] = ec_codeword_generation(data["variable_to_factor_messages"]["message precision"])
 
     # We now have the error correction data, we should return it

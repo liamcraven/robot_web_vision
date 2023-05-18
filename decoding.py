@@ -2,6 +2,9 @@ from data_manipulation import combine_data, data_extraction, data_decompression,
 from error_correction import error_correction_decoding
 from multiplexing import demultiplexer
 
+import qrcode
+import cv2
+
 """
 Decoder Steps:
 QR Code Decoding:
@@ -19,17 +22,34 @@ def image_capture(load_path): #TODO: Implement - May not need to be a function
     This function captures an image.
     """
     # Use the opencv module to capture an image
-    image = NotImplemented
-    return image
+    multiplexed_qr = cv2.imread(load_path)
+    return multiplexed_qr
 
-def qr_code_decoding(red_image, green_image, blue_image): #TODO: Implement 
+def qr_code_decoding(load_path): #TODO: Implement 
     """
     This function decodes the data from the QR code.
     """
+    # Get image
+    image = image_capture(load_path)
+
+    # Demultiplex the image
+    (red_image, green_image, blue_image) = demultiplexer(image)
+
     # Use the qrcode module to decode the QR code for each of the colour channels
-    (red_data, green_data, blue_data) = NotImplemented
+    (red_data, green_data, blue_data) = (scan_qr(red_image), scan_qr(green_image), scan_qr(blue_image))
     return (red_data, green_data, blue_data)
 
+
+def scan_qr(image):
+    # Create a QR code scanner
+    qr_scanner = qrcode.QRCode()
+    # Add the image to the QR code scanner
+    qr_scanner.add_data(image)
+    # Decode the QR code
+    qr_scanner.decode()
+    # Get the data from the QR code
+    data = qr_scanner.data
+    return data
 
 def save_data(data, decoder_save_path): #TODO: Implement 
     """

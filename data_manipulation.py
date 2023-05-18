@@ -5,13 +5,13 @@ def np_to_binary(data):
     """
     This function converts the dictionary of numpy arrays to a single bytestring.
     """
-    data = data["linearization_point"].tobytes()
-    data += data["factor_to_variable_messages"]["message mean"].tobytes()
-    data += data["factor_to_variable_messages"]["message precision"].tobytes()
-    data += data["variable_to_factor_messages"]["message mean"].tobytes()
-    data += data["variable_to_factor_messages"]["message precision"].tobytes()
+    bin_data = data["linearization_point"].tobytes()
+    bin_data += data["factor_to_variable_messages"]["message mean"].tobytes()
+    bin_data += data["factor_to_variable_messages"]["message precision"].tobytes()
+    bin_data += data["variable_to_factor_messages"]["message mean"].tobytes()
+    bin_data += data["variable_to_factor_messages"]["message precision"].tobytes()
 
-    return data
+    return bin_data
 
 # Encoding Tools
 def data_serialization(data_path): #TODO: Implement 
@@ -29,17 +29,19 @@ def prepare_data(data_path): #TODO: Test
     # Serialise data
     data = torch.load(data_path)
 
-    lin_point = data["linearization_point"]
-    f2v = data["factor_to_variable_messages"]
-    v2f = data["variable_to_factor_messages"]
+    lin_point = data["linearization point"].numpy()
+    f2v = data["factor to variable messages"]
+    v2f = data["variable to factor messages"]
 
-    f2v_msg_mean = f2v["message mean"]
-    f2v_msg_precision = f2v["message precision"]
+    f2v_msg_mean = f2v["message mean"].numpy()
+    f2v_msg_precision = f2v["message precision"].numpy()
 
     v2f_msg_mean = v2f["message mean"]
-    v2f_msg_precision = v2f["message precision"]
+    v2f_msg_precision = v2f["message precision"].numpy()
 
     #Convert to numpy array from torch tensor
+
+    """
     lin_point = lin_point.numpy()
 
     f2v_msg_mean = f2v_msg_mean.numpy()
@@ -47,6 +49,8 @@ def prepare_data(data_path): #TODO: Test
 
     v2f_msg_mean = v2f_msg_mean.numpy()
     v2f_msg_precision = v2f_msg_precision.numpy()
+
+    """
 
     # Convert the data back to a dictionary
     data = {"linearization_point": lin_point, "factor_to_variable_messages": {"message mean": f2v_msg_mean, "message precision": f2v_msg_precision}, "variable_to_factor_messages": {"message mean": v2f_msg_mean, "message precision": v2f_msg_precision}}

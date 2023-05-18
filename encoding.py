@@ -1,4 +1,5 @@
 import qrcode
+import base64
 
 from data_manipulation import prepare_data, np_to_binary
 from error_correction import error_correction_encoding
@@ -26,8 +27,19 @@ def qr_code_generation(red_data, green_data, blue_data, version, ec_level): #TOD
     """
     This function generates the QR code for each of the colour channels.
     """
+
+    # Convert data to string: #TODO: We are wasting capacity by converting to string, we will have to 
+    # encode the qr code ourselves eventually
+    red_data = base64.b64encode(red_data)
+    red_data = red_data.decode('ascii')
+    green_data = base64.b64encode(green_data)
+    green_data = green_data.decode('ascii')
+    blue_data = base64.b64encode(blue_data)
+    blue_data = blue_data.decode('ascii')
+
     # Use the qrcode module to generate the QR code for each of the colour channels
     red_qr_code = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4)
+    print(red_qr_code.version)
     red_qr_code.add_data(red_data)
     red_qr_code.make(fit=True)
     red_qr_code = red_qr_code.make_image(fill_color="red", back_color="white")
@@ -59,13 +71,17 @@ def encoder(data_path, error_correction_level, version, encoder_save_path): #TOD
     """
     # Prepare data - we want to get the data into a format that we can use
     data = prepare_data(data_path)
+    print(data)
     # Error correction
     ec_data = error_correction_encoding(data, error_correction_level, version)
+    print("EC data: ")
+
+    print(ec_data)
 
     # Convert data to binary and combine with EC data
     data = np_to_binary(data)
     ec_data = np_to_binary(ec_data)
-    data += ec_data
+    data += ec_data # q - how would we extract the ec data later on? a -
 
     # Color encoding
     (red_data, green_data, blue_data) = color_encoding(data)
