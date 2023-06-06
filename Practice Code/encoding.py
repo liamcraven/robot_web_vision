@@ -39,7 +39,6 @@ def qr_code_generation(red_data, green_data, blue_data, version, ec_level): #TOD
 
     # Use the qrcode module to generate the QR code for each of the colour channels
     red_qr_code = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4)
-    print(red_qr_code.version)
     red_qr_code.add_data(red_data)
     red_qr_code.make(fit=True)
     red_qr_code = red_qr_code.make_image(fill_color="red", back_color="white")
